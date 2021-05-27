@@ -14,9 +14,9 @@ import traceback
 import asyncio
 import logging
 
-from src.ota_dfu_python.unpacker import Unpacker
+from ota_dfu_python.unpacker import Unpacker
 
-from src.ota_dfu_python.ble_secure_dfu_controller import BleDfuControllerSecure
+from ota_dfu_python.ble_secure_dfu_controller import BleDfuControllerSecure
 
 class Dfu():
     def __init__(self, address, zipfile):

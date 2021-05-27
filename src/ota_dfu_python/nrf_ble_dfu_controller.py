@@ -6,7 +6,7 @@ import time
 
 from abc   import ABCMeta, abstractmethod
 from array import array
-from src.ota_dfu_python.util  import *
+from ota_dfu_python.util  import *
 
 verbose = False
 
@@ -103,7 +103,6 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
             self.bin_array = array('B', open(self.firmware_path, 'rb').read())
 
             self.image_size = len(self.bin_array)
-            # print("Binary imge size: %d" % self.image_size)
 
             return
 
@@ -167,9 +166,7 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
         try:
             self.ble_conn.expect([uuid], timeout=10)
             handles = re.findall(b'.*handle: (0x....),.*char value handle: (0x....)', self.ble_conn.before)
-            # print(f"Found handles: {handles} on uuid: {uuid}")
             (handle, value_handle) = handles[-1]
-            # print(f"Selected handle: {handle}, value handle: {value_handle}")
         except pexpect.TIMEOUT as e:
             raise Exception("UUID not found: {}".format(uuid))
 
@@ -187,8 +184,6 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
 
             try:
                 index = self.ble_conn.expect('Notification handle = .*? \r\n', timeout=30)
-
-                print(f"Received notification index: {index}")
 
             except pexpect.TIMEOUT as e:
                 #
@@ -229,7 +224,7 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
         cmd  = 'char-write-req 0x%04x %02x' % (self.ctrlpt_handle, procedure)
         cmd += array_to_hex_string(params)
 
-        print(f"Sending command {cmd}")
+        logging.debug(f"Sending command {cmd}")
 
         self.ble_conn.sendline(cmd)
 
@@ -247,7 +242,7 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
         cmd += ' '
         cmd += array_to_hex_string(data)
 
-        logging.debug(f"Sending cmd {cmd}")
+        logging.debug(f"Sending data command {cmd}")
 
         self.ble_conn.sendline(cmd)
 

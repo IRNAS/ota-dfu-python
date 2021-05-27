@@ -1,3 +1,7 @@
+"""
+LEGACY DFU HAS NOT BEEN IMPLEMENTED YET!
+We will implement it when we will need it.
+"""
 import math
 import pexpect
 import time

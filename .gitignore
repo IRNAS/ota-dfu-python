@@ -1,2 +1,5 @@
 *.pyc
 *.sublime*
+*/__pycache__/*
+ota_dfu_python.egg-info
+.vscode/*

@@ -4,9 +4,9 @@ import time
 import logging
 
 from array import array
-from src.ota_dfu_python.util import *
+from ota_dfu_python.util import *
 
-from src.ota_dfu_python.nrf_ble_dfu_controller import NrfBleDfuController
+from ota_dfu_python.nrf_ble_dfu_controller import NrfBleDfuController
 
 verbose = False
 
@@ -119,7 +119,6 @@ class BleDfuControllerSecure(NrfBleDfuController):
         return dfu_mode
 
     def switch_to_dfu_mode(self):
-        print("SWITCHING TO DFU MODE")
         logging.info("Switching to DFU mode")
         (_, bl_value_handle, bl_cccd_handle) = self._get_handles(self.UUID_BUTTONLESS)
 
@@ -202,7 +201,6 @@ class BleDfuControllerSecure(NrfBleDfuController):
                 Procedures.to_string(result[0]),
                 Results.to_string(result[1])))
 
-        print(f"Returning result: {result}")
         return result
 
     # --------------------------------------------------------------------------
@@ -219,22 +217,16 @@ class BleDfuControllerSecure(NrfBleDfuController):
         # Select command
         self._dfu_send_command(Procedures.SELECT, [Procedures.PARAM_COMMAND])
         try:
-            logging.info("Waiting for notification 0")
             (proc, res, max_size, offset, crc32) = self._wait_and_parse_notify()
         except Exception as e:
             logging.error(f"An error when waiting for notification 0: {e}")
             return None
 
-        print("Passed notification 0")
-        print(f"Init crc: {init_crc}, received crc:{crc32}")
         if offset != init_size or crc32 != init_crc:
-            print("Inside ")
             if offset == 0 or offset > init_size:
                 # Create command
-                print("Sending CREATE command")
                 self._dfu_send_command(Procedures.CREATE, [Procedures.PARAM_COMMAND] + uint32_to_bytes_le(init_size))
                 try:
-                    logging.info("Waiting for notification 1")
                     res = self._wait_and_parse_notify()
                 except Exception as e:
                     logging.error(f"An error when waiting for notification 1: {e}")
@@ -245,13 +237,11 @@ class BleDfuControllerSecure(NrfBleDfuController):
 
                 for i in range(0, init_size, self.pkt_payload_size):
                     segment = init_bin_array[i:i + self.pkt_payload_size]
-                    print(f"Sending {i}th segment")
                     self._dfu_send_data(segment)
                     segment_count += 1
 
                     if (segment_count % self.pkt_receipt_interval) == 0:
                         try:
-                            logging.info("Waiting for notification 2")
                             (proc, res, offset, crc32) = self._wait_and_parse_notify()
                         except Exception as e:
                             logging.error(f"An error when waiting for notification 2: {e}")
@@ -263,16 +253,14 @@ class BleDfuControllerSecure(NrfBleDfuController):
             else:
                 self._dfu_send_command(Procedures.EXECUTE)
                 try:
-                    logging.info("Waiting for notification 1")
                     res = self._wait_and_parse_notify()
                 except Exception as e:
-                    logging.error(f"An error when waiting for notification 1: {e}")
+                    logging.error(f"An error when waiting for notification 3: {e}")
                     return None
 
                 # Select command
                 self._dfu_send_command(Procedures.SELECT, [Procedures.PARAM_COMMAND])
                 try:
-                    logging.info("Waiting for notification 0")
                     (proc, res, max_size, offset, crc32) = self._wait_and_parse_notify()
                 except Exception as e:
                     logging.error(f"An error when waiting for notification 0: {e}")
@@ -280,16 +268,13 @@ class BleDfuControllerSecure(NrfBleDfuController):
 
 
             # Calculate CRC
-            print("SENDING CALC CHECKSUM COMMAND")
             self._dfu_send_command(Procedures.CALC_CHECKSUM)
             try:
-                logging.info("Waiting for notification 3")
                 self._wait_and_parse_notify()
             except Exception as e:
                 logging.error(f"An error when waiting for notification 3: {e}")
                 return None
 
-        print("Sending EXECUTE")
         # Execute command
         self._dfu_send_command(Procedures.EXECUTE)
         try:
@@ -332,7 +317,7 @@ class BleDfuControllerSecure(NrfBleDfuController):
         print_progress(self.image_size, self.image_size, barLength = 50)
 
         duration = time.time() - time_start
-        logging.info("\nUpload complete in {} minutes and {} seconds".format(int(duration / 60), int(duration % 60)))
+        logging.info("Upload complete in {} minutes and {} seconds".format(int(duration / 60), int(duration % 60)))
 
     # --------------------------------------------------------------------------
     #  Send a single data object of given size and offset.
