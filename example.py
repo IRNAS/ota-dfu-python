@@ -2,9 +2,25 @@ import logging
 import argparse
 import asyncio
 
-from PyInquirer import prompt
+from PyInquirer import prompt, style_from_dict, Token
 from bleak import discover
-from ota_dfu_python.dfu import Dfu
+from ota_dfu_python.dfu import SecureDfu
+
+def select_ble_device(devices):
+    """Select device used for DFU"""
+    
+    question_devices = [
+        {
+            "type": "list",
+            "message": "Select discovered BLE device",
+            "name": "device",
+            "choices": [{"name": f"Address: {d.address}, Name: {d.name}", "value": d.address} for d in devices]
+        }
+    ]
+    
+    selected_device = prompt(question_devices)["device"]
+    print(selected_device)
+    return selected_device
 
 def get_ble_devices(loop):
     """Finds all devices containg 'identifier' in name"""
@@ -21,22 +37,6 @@ def get_ble_devices(loop):
         logging.error(f"An exception occured during BLE device disveory: {e}")
         device_list = None
     return device_list
-
-def select_ble_device(devices):
-    """Select device used for DFU"""
-    
-    question_devices = [
-        {
-            "type": "list",
-            "message": "Select discovered BLE device",
-            "name": "device",
-            "choices": [{"name": f"Address: {d.address}, name: {d.name}", "value": d.address} for d in devices]
-        }
-    ]
-    
-    selected_device = prompt(question_devices)["device"]
-    print(selected_device)
-    return selected_device
 
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
@@ -68,8 +68,7 @@ if zipfile is not None and address is not None:
     while not success:
         try:
             # initialize dfu class
-            dfu = Dfu(address, zipfile)
-            dfu.perform_dfu()
-            success = True
+            dfu = SecureDfu(address, zipfile)
+            success = dfu.perform_dfu()
         except Exception as e:
             logging.error(f"Unable to perform dfu. Reason: {e}")
