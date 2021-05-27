@@ -1,10 +1,13 @@
 import logging
 import argparse
 import asyncio
+import time
+import sys
 
 from PyInquirer import prompt, style_from_dict, Token
 from bleak import discover
 from ota_dfu_python.dfu import SecureDfu
+from ota_dfu_python.unpacker import Unpacker
 
 def select_ble_device(devices):
     """Select device used for DFU"""
@@ -44,31 +47,67 @@ logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', datefmt=
 parser = argparse.ArgumentParser(description="python3 example.py -z <zip_file> -a <dfu_target_address>")
 parser.add_argument('-a', '--address', action='store', dest="address", default=None, help='DFU target address.')
 parser.add_argument('-z', '--zipfile', action='store', dest="zipfile", default=None, help='Zip file to be used.')
+parser.add_argument('-f', '--hexfile', action='store', dest="hexfile", default=None, help='Hex file to be used.')
+parser.add_argument('-d', '--datfile', action='store', dest="datfile", default=None, help='Dat file to be used.')
 args = parser.parse_args()
 
 address = None
 zipfile = None
+hexfile = None
+datfile = None
 
 if args.address is not None:
     address = args.address
+
 if args.zipfile is not None:
     zipfile = args.zipfile
+    unpacker = Unpacker()
+    try:
+        hexfile, datfile = unpacker.unpack_zipfile(zipfile)	
+    except Exception as e:
+        logging.info(f"An exception occured when trying to unpack zipfile: {e}")
+
+else:
+    if args.hexfile is not None:
+        hexfile = args.hexfile
+    else:
+        logging.warning("Hexfile is not specified! Can not perform Secure DFU!")
+        sys.exit(0)
+
+    if args.datfile is not None:
+        datfile = args.datfile
+    else:
+        logging.warning("Datfile is not specified! Can not perform Secure DFU!")
+        sys.exit(0)
 
 if address is None:
+    logging.warning("No device address specified.")
+    time.sleep(1)
     loop = asyncio.get_event_loop()
     devices = get_ble_devices(loop)
     selected_device = select_ble_device(devices)
     address = selected_device
 
-if zipfile is not None and address is not None:
-
+if hexfile is not None and datfile is not None:
     # dfu sometimes fails, retry until it succeeds
     # TODO: find out WHY dfu fails
     success = False
+    fail_counter = 0
     while not success:
+
+        if fail_counter > 5:  # stop after 5 retries
+            logging.error(f"Failed to perform DFU on device {address}. Exiting.")
+            break
+
         try:
             # initialize dfu class
-            dfu = SecureDfu(address, zipfile)
-            success = dfu.perform_dfu()
+            dfu = SecureDfu(address, hexfile, datfile)
+            dfu.perform_dfu()
+            success = True
+            if not success:
+                fail_counter += 1
         except Exception as e:
             logging.error(f"Unable to perform dfu. Reason: {e}")
+            
+        time.sleep(1)
+
