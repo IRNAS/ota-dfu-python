@@ -127,7 +127,7 @@ class BleDfuControllerSecure(NrfBleDfuController):
         self.ble_conn.sendline(cmd)
         # Verify that command was successfully written
         try:
-            res = self.ble_conn.expect('Characteristic value was written successfully.*', timeout=10)
+            res = self.ble_conn.expect('Characteristic value was written successfully.*', timeout=2)
         except pexpect.TIMEOUT as e:
             logging.error(f"State timeout when switching to dfu mode: {e}")
 

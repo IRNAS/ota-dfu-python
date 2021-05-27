@@ -183,7 +183,7 @@ class NrfBleDfuController(object, metaclass=ABCMeta):
                 return None
 
             try:
-                index = self.ble_conn.expect('Notification handle = .*? \r\n', timeout=30)
+                index = self.ble_conn.expect('Notification handle = .*? \r\n', timeout=2)
 
             except pexpect.TIMEOUT as e:
                 #
