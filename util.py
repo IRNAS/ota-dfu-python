@@ -63,8 +63,10 @@ def print_progress(iteration, total, prefix = '', suffix = '', decimals = 1, bar
     formatStr       = "{0:." + str(decimals) + "f}"
     percents        = formatStr.format(100 * (iteration / float(total)))
     filledLength    = int(round(barLength * iteration / float(total)))
-    bar             = 'x' * filledLength + '-' * (barLength - filledLength)
-    sys.stdout.write('\r%s |%s| %s%s %s (%d of %d bytes)' % (prefix, bar, percents, '%', suffix, iteration, total)),
+    bar             = '#' * filledLength + '.' * (barLength - filledLength)
+    if len(prefix):
+        prefix = prefix + ' '
+    sys.stdout.write('\r%s[%s] %s%s %s (%d of %d kb)' % (prefix, bar, percents, '%', suffix, iteration/1024, total/1024)),
     if iteration == total:
         sys.stdout.write('\n')
     sys.stdout.flush()

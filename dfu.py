@@ -19,17 +19,6 @@ from ble_legacy_dfu_controller import BleDfuControllerLegacy
 
 def main():
 
-    init_msg =  """
-    ================================
-    ==                            ==
-    ==         DFU Server         ==
-    ==                            ==
-    ================================
-    """
-
-    # print "DFU Server start"
-    print(init_msg)
-
     try:
         parser = optparse.OptionParser(usage='%prog -f <hex_file> -a <dfu_target_address>\n\nExample:\n\tdfu.py -f application.hex -d application.dat -a cd:e3:4a:47:1c:e4',
                                        version='0.5')
@@ -79,6 +68,11 @@ def main():
                   help='Use secure bootloader (Nordic SDK < 12)'
                   )
 
+        parser.add_option('-v', '--verbose',
+                  action='store_true',
+                  dest='verbose',
+                  help='Enable verbose mode'
+                  )
         options, args = parser.parse_args()
 
     except Exception as e:
@@ -132,6 +126,19 @@ def main():
 
         ''' Start of Device Firmware Update processing '''
 
+        if options.verbose:
+            init_msg = \
+"""
+    ================================
+    ==                            ==
+    ==         DFU Server         ==
+    ==                            ==
+    ================================
+"""
+            # print "DFU Server start"
+            print(init_msg)
+
+
         if options.secure_dfu:
             ble_dfu = BleDfuControllerSecure(options.address.upper(), hexfile, datfile)
         else:
@@ -173,7 +180,8 @@ def main():
     if unpacker != None:
        unpacker.delete()
 
-    print("DFU Server done")
+    if options.verbose:
+        print("DFU Server done")
 
 """
 ------------------------------------------------------------------------------

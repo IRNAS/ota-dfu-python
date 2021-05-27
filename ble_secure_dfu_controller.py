@@ -261,7 +261,7 @@ class BleDfuControllerSecure(NrfBleDfuController):
             obj_offset += self._dfu_send_object(obj_offset, max_size)
 
         # Image uploaded successfully, update the progress bar
-        print_progress(self.image_size, self.image_size, prefix = 'Progress:', suffix = 'Complete', barLength = 50)
+        print_progress(self.image_size, self.image_size, barLength = 50)
 
         duration = time.time() - time_start
         print("\nUpload complete in {} minutes and {} seconds".format(int(duration / 60), int(duration % 60)))
@@ -306,7 +306,7 @@ class BleDfuControllerSecure(NrfBleDfuController):
                         # Something went wrong, need to re-transmit this object
                         return 0
 
-                    print_progress(offset, self.image_size, prefix = 'Progress:', suffix = 'Complete', barLength = 50)
+                    print_progress(offset, self.image_size, barLength = 50)
 
             # Calculate CRC
             self._dfu_send_command(Procedures.CALC_CHECKSUM)

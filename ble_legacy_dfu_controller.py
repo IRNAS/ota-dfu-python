@@ -146,7 +146,7 @@ class BleDfuControllerLegacy(NrfBleDfuController):
             # last_send_time = time.time()
 
             if (segment_count == segment_total):
-                print_progress(self.image_size, self.image_size, prefix = 'Progress:', suffix = 'Complete', barLength = 50)
+                print_progress(self.image_size, self.image_size, barLength = 50)
 
                 duration = time.time() - time_start
                 print("\nUpload complete in {} minutes and {} seconds".format(int(duration / 60), int(duration % 60)))
@@ -164,7 +164,7 @@ class BleDfuControllerLegacy(NrfBleDfuController):
                 if res != Responses.SUCCESS:
                     raise Exception("bad notification status: {}".format(Responses.to_string(res)))
 
-                print_progress(pkts, self.image_size, prefix = 'Progress:', suffix = 'Complete', barLength = 50)
+                print_progress(pkts, self.image_size, barLength = 50)
 
         # Send Validate Command
         self._dfu_send_command(Procedures.VALIDATE_FIRMWARE)
