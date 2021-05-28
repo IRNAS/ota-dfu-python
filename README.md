@@ -62,7 +62,7 @@ A `*.zip` file is expected as the input to the Dfu class. Bundle the `*.dat` and
         except Exception as e:
             logging.error(f"Unable to perform dfu. Reason: {e}")
 
-To run the complete example with device discovery and cli parameters run `python3 example.py -z <dfu_filename> -a <device_address>`. If not address is specified a prompt will appear with all discovered BLE devices and select one there.
+To run the complete example with device discovery and cli parameters run `python3 example.py -a <device_address> -z <dfu_filename>` or `python3 example.py -a <device_address> -d <datfile_filename> -f <hexfile_filename>`. If no address is specified a prompt will appear with all discovered BLE devices, select one from the list.
 
 
 ## Example Output
